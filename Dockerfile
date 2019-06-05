@@ -9,6 +9,7 @@ RUN adduser --system --group --shell /bin/sh --disabled-password --uid 1000 auto
 
 COPY pre-create-users.sh /usr/local/bin/pre-create-users.sh
 COPY sleep.sh /usr/local/bin/sleep.sh
+COPY cleanup_port.sh /usr/local/bin/cleanup_port.sh
 RUN mkdir /var/run/sshd
 
 EXPOSE 22
