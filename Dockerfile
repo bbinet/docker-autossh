@@ -3,20 +3,24 @@ FROM debian:stretch
 MAINTAINER Bruno Binet <bruno.binet@helioslite.com>
 
 RUN apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends openssh-server dumb-init
+  DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+    openssh-server dumb-init net-tools sudo
 
-RUN adduser --system --group --shell /bin/sh --disabled-password --uid 1000 autossh
-
-COPY pre-create-users.sh /usr/local/bin/pre-create-users.sh
+COPY pre-start.sh /usr/local/sbin/pre-start.sh
 COPY sleep.sh /usr/local/bin/sleep.sh
-COPY cleanup_port.sh /usr/local/bin/cleanup_port.sh
-RUN mkdir /var/run/sshd
+COPY cleanup_port.sh /usr/local/sbin/cleanup_port.sh
+
+RUN chmod 750 /usr/local/sbin/* && \
+    adduser --group --system --shell /bin/sh --disabled-password \
+      --home /var/lib/autossh autossh && \
+    mkdir -p -m 700 /var/lib/autossh/.ssh && \
+    chown -R autossh:autossh /var/lib/autossh && \
+    mkdir /var/run/sshd
 
 EXPOSE 22
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-ENV HOST_KEY /etc/ssh/ssh_host_rsa_key
-ENV AUTHORIZED_KEYS_FILE /etc/ssh/authorized_keys
+ENV AUTOSSH_PUBKEY_PATH /run/secrets/autossh_id_rsa.pub
 
-CMD ["bash", "-c", "/usr/local/bin/pre-create-users.sh && /usr/sbin/sshd -h $HOST_KEY -o AuthorizedKeysFile=$AUTHORIZED_KEYS_FILE -D"]
+CMD ["bash", "-c", "/usr/local/sbin/pre-start.sh && /usr/sbin/sshd -D"]
