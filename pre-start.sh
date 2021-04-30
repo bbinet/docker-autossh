@@ -19,6 +19,9 @@ create_user() {
         abort "=> create_user 2 args are required (user, password)."
     fi
     useradd --create-home --shell /bin/bash ${user}
+    chmod 700 /home/${user}
+    mkdir -p -m 700 /home/${user}/.ssh
+    chown -R ${user}:${user} /home/${user}
     echo "${user}:${password}" | chpasswd
     if [ $? -eq 0 ]; then
         echo "${user} ALL=(ALL) NOPASSWD: /usr/local/sbin/cleanup_port.sh" >> /etc/sudoers.d/91-custom-sudo-users
@@ -32,8 +35,10 @@ create_user() {
 # setup autossh authorized_keys
 if [ -f $AUTOSSH_PUBKEY_PATH ]; then
     echo "command=\"/usr/local/bin/sleep.sh\",no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc $(cat $AUTOSSH_PUBKEY_PATH)" > /var/lib/autossh/.ssh/authorized_keys
+    chmod 700 /var/lib/autossh
+    chmod 700 /var/lib/autossh/.ssh
     chmod 600 /var/lib/autossh/.ssh/authorized_keys
-    chown autossh:autossh /var/lib/autossh/.ssh/authorized_keys
+    chown -R autossh:autossh /var/lib/autossh/
 else
     abort "=> Cannot find autossh pub key at: \"$AUTOSSH_PUBKEY_PATH\""
 fi

@@ -13,6 +13,7 @@ COPY cleanup_port.sh /usr/local/sbin/cleanup_port.sh
 RUN chmod 750 /usr/local/sbin/* && \
     adduser --group --system --shell /bin/sh --disabled-password \
       --home /var/lib/autossh autossh && \
+    chmod 700 /var/lib/autossh && \
     mkdir -p -m 700 /var/lib/autossh/.ssh && \
     chown -R autossh:autossh /var/lib/autossh && \
     mkdir /var/run/sshd
