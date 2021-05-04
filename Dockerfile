@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:buster
 
 MAINTAINER Bruno Binet <bruno.binet@helioslite.com>
 
